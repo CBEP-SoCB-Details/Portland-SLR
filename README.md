@@ -21,27 +21,18 @@ In this case, as our goal was to recreate the graphic that NOAA makes available,
 
 # Summary of Data Sources
 The data used to produce the SLR graphic from the State of the Bay report was downloaded directly from NOAA Tides and Currents here:
-[Portland, Maine SLR Info from NOAA](https://tidesandcurrents.noaa.gov/sltrends/sltrends_station.shtml?id=8418150)
+[Portland, Maine SLR Info from NOAA](https://tidesandcurrents.noaa.gov/sltrends/sltrends_station.shtml?id=8418150).
 
 The data description on the source web site says the following: 
 > "The plot shows the monthly mean sea level without the regular seasonal fluctuations due to coastal
 > ocean temperatures, salinities, winds, atmospheric pressures, and ocean currents. ... The plotted
 > values are relative to the most recent Mean Sea Level datum established by CO-OPS."
 
-In other words, these data are not raw data, but have been pre-processed to a limited extent by NOAA.
+In other words, these data are not raw data, but have been pre-processed by NOAA.
+The webpage declares the average Sea Level Rise to be 1.89+/- 0.14 mm/yr which is equivalent to a change of 0.62 feet in 100 years. 
    
 Related data, which we did not end up using, was downloaded directly from the NOAA API using a simple python script [included in this archive](Original_Data/portland_tide_gage_monthly_means.py).
 Data from the two data sources is highly correlated, but not identical, which presumably reflects NOAA's pre-processing of the data.
 
-
-Data downloaded directly from NOAA Tides and Currents
-https://tidesandcurrents.noaa.gov/sltrends/sltrends_station.shtml?id=8418150 June 6, 2020 by Curtis C. Bohlen
-(Using "Export to CSV" button)
-Note:  The site declares the avg Sea Level Rise to be 1.89+/- 0.14 mm/yr which is equivalent to a change of 0.62 feet in 100 years. 
-
-Portland_SLR_History.csv:
-Data downloaded directly from NOAA API using a simple python script.
-Data is highly correlated, but not identical. There appear to have been some systematic adjustments in the LT sea level trends.
-
-# Links to R Notebooks
+# Link to R Notebooks
 [SLR Graphics][Graphics/SLR_Graphic]
