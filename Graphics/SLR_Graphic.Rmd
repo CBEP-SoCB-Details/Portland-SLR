@@ -2,9 +2,10 @@
 title: "Graphics for Sea Level Rise at Portland, Maine"
 author: Curtis C. Bohlen
 output:
-  html_notebook:
+  github_document:
     toc: true
-    number_sections: true
+    fig_width: 7
+    fig_height: 5
 ---
 
 <img
@@ -15,8 +16,6 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.align = 'center',
                       fig.width = 7, fig.height = 5,
-                      cache = TRUE,
-                      autodep= TRUE,
                       collapse = TRUE, comment = "#>")
 ```
  
