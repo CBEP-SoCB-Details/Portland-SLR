@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 """
-Quick script to download Portland Tide Station data to CSV files
+Simple script to download Portland Tide Station data to CSV files.
 
-A script is convenient because 6 min resolution data are only available on a
-monthly basis.
+This script dowloads monthly means. Minor modifications can provide access to a
+wide variety of tide data, including six minute interval tidal elevations, tide
+predictions, etc. A script is convenient for data access in part because 6 min
+resolution data are only downloadable on a monthly basis.  This script manages
+sequential downloads and assembly of a consistent data set.
 
-@author: Curtis
+The API is described here:
+https://tidesandcurrents.noaa.gov/api/
+
+@author: Curtis Bohlen, Casco Bay Estuary Partnership
+@date:  June, 2020
 """
 import requests
 
