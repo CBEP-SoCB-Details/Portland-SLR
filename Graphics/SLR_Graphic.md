@@ -60,11 +60,13 @@ load_cbep_fonts()
 Our primary source data is based on NOAA’s analysis of sea level trends.
 The description on the source web site
 (<https://tidesandcurrents.noaa.gov/datums.html?id=8418150>) says the
-following, so this is apparently NOT raw data. \> “The plot shows the
-monthly mean sea level without the regular seasonal fluctuations due to
-coastal ocean temperatures, salinities, winds, atmospheric pressures,
-and ocean currents. … The plotted values are relative to the most recent
-Mean Sea Level datum established by CO-OPS.”
+following, so this is apparently NOT raw data.
+
+> “The plot shows the monthly mean sea level without the regular
+> seasonal fluctuations due to coastal ocean temperatures, salinities,
+> winds, atmospheric pressures, and ocean currents. … The plotted values
+> are relative to the most recent Mean Sea Level datum established by
+> CO-OPS.”
 
 For convenience, we want to be able to report these elevations as
 positive values, which makes it easier for readers to compare
@@ -74,10 +76,13 @@ that practice here.
 According to <https://tidesandcurrents.noaa.gov/datums.html?id=8418150>,
 at Portland, MLLW has an elevation (in feet) of 0.0 , while MSL has an
 elevation of 4.94. We can convert elevations in inches MSL to elevations
-in inches (MLLW) as follows: \[
+in inches (MLLW) as follows:
+
+\[
 E_{MLLW} = E_{MSL} + (4.94 ft\times \frac{12 in}{1 ft})
 \] An alternative is to declare some other arbitrary sea level datum as
-a “Relative Sea Level.”
+a “Relative Sea Level.” We prepare a graphic that way, below, but chose
+not to use it.
 
 ``` r
 sibfldnm <- 'Original Data'

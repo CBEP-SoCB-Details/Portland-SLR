@@ -38,19 +38,22 @@ load_cbep_fonts()
 
 
 # Import Data
-Our primary source data is based on NOAA's analysis of sea level trends.  The description on the source web site (https://tidesandcurrents.noaa.gov/datums.html?id=8418150) says the following, so this is apparently NOT raw data. 
+Our primary source data is based on NOAA's analysis of sea level trends.  The description on the source web site (https://tidesandcurrents.noaa.gov/datums.html?id=8418150) says the following, so this is apparently NOT raw data.  
+
 > "The plot shows the monthly mean sea level without the regular seasonal fluctuations due to coastal
-   ocean temperatures, salinities, winds, atmospheric pressures, and ocean currents. ... The plotted
-   values are relative to the most recent Mean Sea Level datum established by CO-OPS." 
+>  ocean temperatures, salinities, winds, atmospheric pressures, and ocean currents. ... The plotted
+> values are relative to the most recent Mean Sea Level datum established by CO-OPS."  
 
-For convenience, we want to be able to report these elevations as positive values, which makes it easier for readers to compare elevations.  NOAA uses a datum of MLLW for charting purposes.  We follow that practice here.
+For convenience, we want to be able to report these elevations as positive values, which makes it easier for readers to compare elevations.  NOAA uses a datum of MLLW for charting purposes.  We follow that practice here.  
 
-According to https://tidesandcurrents.noaa.gov/datums.html?id=8418150,
-at Portland, MLLW has an elevation (in feet) of 0.0 , while MSL has an elevation of 4.94.  We can convert elevations in inches MSL to elevations in inches (MLLW) as follows:
+According to https://tidesandcurrents.noaa.gov/datums.html?id=8418150, 
+at Portland, MLLW has an elevation (in feet) of 0.0 , while MSL has an elevation of 4.94.  We can convert elevations in inches MSL to elevations in inches (MLLW) as follows:  
+
 $$
 E_{MLLW} = E_{MSL} + (4.94 ft\times \frac{12 in}{1 ft})
 $$
-An alternative is to declare some other arbitrary sea level datum as a "Relative Sea Level."  
+An alternative is to declare some other arbitrary sea level datum as a "Relative Sea Level."  We prepare a graphic that way, below, but chose not to use it.
+
 ```{r load_data}
 sibfldnm <- 'Original Data'
 parent <- dirname(getwd())
@@ -68,12 +71,12 @@ slr_data  <- read_csv(fpath,
          RSL_in = MSL_in + 10)
 ```
 
-# Estimating the Linear Trend 
+# Estimating the Linear Trend  
 We use a linear model analysis to compare results to the linear trend reported by NOAA on the source web page.  NOAA reports the rate of sea level rise in millimeters as $1.9 \pm 0.14 mm /yr$. 
 
-Since the NOAA data, although monthly, are reported by date, the model coefficients are expressed in DAYS,. To find the relevant annual rate of sea level rise, we need to multiply both estimate (slope) and its standard error by 365.25 (approximate length of a year in days) and then multiply again by 1000 to convert from meters to millimeters.
+Since the NOAA data, although monthly, are reported by date, the model coefficients are expressed in DAYS,. To find the relevant annual rate of sea level rise, we need to multiply both estimate (slope) and its standard error by 365.25 (approximate length of a year in days) and then multiply again by 1000 to convert from meters to millimeters.  
 
-The estimate from a simple linear model matches NOAA's reported estimate, but the standard error and derived 95% confidence interval are  considerably narrower.  NOAA appropriately treated this as an auto-correlated time series, instead of simply as a linear model. We do the same, specifying and autoregressive error function of order 1.
+The estimate from a simple linear model matches NOAA's reported estimate, but the standard error and derived 95% confidence interval are  considerably narrower.  NOAA appropriately treated this as an auto-correlated time series, instead of simply as a linear model. We do the same, specifying and autoregressive error function of order 1.  
 
 ```{r slr_gls}
 the_gls <- gls(MSL~theDate, data=slr_data, correlation = corAR1())
