@@ -36,7 +36,7 @@ Several reviewers wanted us to highlight that recent SLR rates in our
 region are higher than they used to be and so SLR rates are
 “accelerating”.
 
-Here we determine whether the data from the Portland Jetport supports
+Here we determine whether the data from the Portland Tide Gage supports
 that idea.
 
 # Import Libraries
@@ -76,8 +76,8 @@ theme_set(theme_cbep())
 
 Our primary source data is based on NOAA’s analysis of sea level trends.
 The description on the source web site
-(<https://tidesandcurrents.noaa.gov/datums.html?id=8418150>) says the
-following, so this is apparently NOT raw data.
+(<https://tidesandcurrents.noaa.gov/sltrends/sltrends_station.shtml?id=8418150>)
+says the following, so this is apparently NOT raw data.
 
 > “The plot shows the monthly mean sea level without the regular
 > seasonal fluctuations due to coastal ocean temperatures, salinities,
