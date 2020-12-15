@@ -1,0 +1,186 @@
+---
+title: "Daily Frequency of Tidal Flooding Events 1912 to 2019"
+author: "Curtis C. Bohlen"
+date: "December 14, 2020"
+output:
+  github_document:
+    toc: true
+    fig_width: 7
+    fig_height: 5
+---
+
+<img
+    src="https://www.cascobayestuary.org/wp-content/uploads/2014/04/logo_sm.jpg"
+    style="position:absolute;top:10px;right:50px;" />
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.align = 'center',
+                      fig.width = 5, fig.height = 3,
+                      collapse = TRUE, comment = "#>")
+```
+ 
+# Introduction
+One reviewer pointed out that for all weather-related events, we presented data
+in SoCB on the changing frequency of "events" over time, including hot days, cold
+days, large storms, etc.  They suggested we consider showing a similar graphic
+showing changes in frequency of tidal flooding events.  This Notebook takes a
+look at the historical record.
+
+We follow Maine Geological Survey's practice of declaring a tidal flooding event
+whenever tidal observations exceed the current "Highest Astronomical Tide" or 
+HAT level, which is 11.95 feet, or 	3.640 meters above mean lower low water
+(MLLW) at Portland.
+
+That HAT level, strictly speaking, is defined in terms of a specific 19 year
+long tidal epoch, from 1983 through 2001, but it provides a useful and
+consistent benchmark for extreme high tides.
+
+# Import Libraries
+```{r libraries}
+library(tidyverse)
+library(readr)
+
+#library(zoo)     # for the rollmean function
+
+#library(nlme)    # for gls
+
+library(CBEPgraphics)
+load_cbep_fonts()
+theme_set(theme_cbep())
+```
+
+# Import Data
+Our primary source data is hourly data on observed and predicted water levels at
+the Portland tide station (Station 8418150).  We accessed these data using small
+python scripts to download and assemble consistent data from the NOAA Tides and
+Currents API.  Details are provided in the "Original Data" folder.
+
+```{r folders}
+sibfldnm <- 'Original Data'
+parent <- dirname(getwd())
+sibling <- file.path(parent,sibfldnm)
+
+dir.create(file.path(getwd(), 'figures'), showWarnings = FALSE)
+```
+
+
+```{r load_observed_data}
+fn <- 'portland_tides_hourly.csv'
+fpath <- file.path(sibling, fn)
+
+observed_data  <- read_csv(fpath, col_types = cols(Time = col_time('%H:%M'))) %>%
+  rename(MLLW = `Water Level`,
+         theDate =`Date`) %>%
+  mutate(Year = as.numeric(format(theDate, '%Y')),
+         MLLW_ft = MLLW * 3.28084,
+         Exceeds = MLLW > 3.640)
+```
+
+
+```{r}
+obs_daily <- observed_data %>%
+  group_by(theDate) %>%
+  summarize(Year = first(Year),
+            Exceeded = any(Exceeds, na.rm = TRUE),
+            n = sum(! is.na(Exceeds)),
+            .groups = 'drop')
+
+```
+
+```{r}
+obs_annual <- obs_daily %>%
+  filter(n == 24) %>%  # eliminate any partial records
+  group_by(Year) %>%
+  summarize(Days = n(),
+            Floods = sum(Exceeded),
+            NoFloods = Days - Floods,
+            prob_flood = Floods/Days,
+            .groups = 'drop')
+```
+
+# Preliminary Graphics
+
+```{r}
+ggplot(obs_annual, aes(Year, Floods)) +
+  geom_point(aes(color = Days<365)) +
+  geom_smooth(se = FALSE) +
+  ylab('Tidal Flood Events')
+```
+
+
+We have a slight problem with figuring out how to analyze this, as we need to
+decide whether to analyze as though we have data from all days or not.  It
+simplifies the graphics, but since years with partial data are mostly early
+in the record, it may bias results.
+
+```{r}
+ggplot(obs_annual, aes(Year, prob_flood)) +
+  geom_point(aes(color = Days<365)) +
+  geom_smooth(se = FALSE) +
+  
+  ylab('Daily Probability of\nTidal Flooding' )
+```
+
+# Generalized Linear Model
+We fit a binomial model to the number of days flooded versus the number of '
+days without flooding, thus estimating the annual daily probability of flooding
+```{r}
+the_glm <- glm(cbind(Floods, NoFloods) ~ Year, family = 'binomial',
+               data = obs_annual)
+summary(the_glm)
+```
+
+```{r}
+anova(the_glm, test = 'LRT')
+```
+
+
+## Graphics Showing Model Results
+```{r}
+obs_annual <- obs_annual %>%
+  mutate(predict = predict(the_glm, type = 'response'))
+```
+
+
+```{r}
+plt <- ggplot(obs_annual, aes(Year, prob_flood)) +
+  geom_point(color =cbep_colors()[4]) +
+  geom_line(aes(y = predict),
+            color = cbep_colors()[5]) +
+  
+  ylab('Daily Probability of\nTidal Flooding' )
+
+plt
+```
+
+### Alternate Graphic 
+```{r}
+ggplot(obs_annual, aes(Year, prob_flood * 365)) +
+  geom_point(color =cbep_colors()[4]) +
+  geom_line(aes(y = predict * 365),
+            color = cbep_colors()[5]) +
+  
+  ylab('Estimated Days of\nTidal Flooding' )
+```
+
+
+
+
+```{r}
+annot_data <- obs_annual %>%
+  filter(Year %in% c(1912, 2019)) %>%
+  mutate(annot = paste("About", 
+                       round(365 * predict,1),
+                       '\nFloods per Year'),
+         height = c(0.02, 0.05)) %>%
+  
+  select(Year, height, annot)
+annot_data
+```
+# Annotated Graphic
+```{r annotate_graphic}
+plt +
+  geom_text(aes(x = Year, y = height, label = annot, hjust = c(0,1)),
+            data = annot_data, size = 3)
+```
+

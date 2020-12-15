@@ -26,12 +26,12 @@ monthly values, we need only plot NOAA data, with minimal processing.
 
 ``` r
 library(tidyverse)
-#> -- Attaching packages ----------------------------------------------------------------------- tidyverse 1.3.0 --
+#> -- Attaching packages --------------------------------------- tidyverse 1.3.0 --
 #> v ggplot2 3.3.2     v purrr   0.3.4
-#> v tibble  3.0.3     v dplyr   1.0.2
+#> v tibble  3.0.4     v dplyr   1.0.2
 #> v tidyr   1.1.2     v stringr 1.4.0
-#> v readr   1.3.1     v forcats 0.5.0
-#> -- Conflicts -------------------------------------------------------------------------- tidyverse_conflicts() --
+#> v readr   1.4.0     v forcats 0.5.0
+#> -- Conflicts ------------------------------------------ tidyverse_conflicts() --
 #> x dplyr::filter() masks stats::filter()
 #> x dplyr::lag()    masks stats::lag()
 library(readr)
@@ -76,7 +76,7 @@ that practice here.
 According to <https://tidesandcurrents.noaa.gov/datums.html?id=8418150>,
 at Portland, MLLW has an elevation (in feet) of 0.0 , while MSL has an
 elevation of 4.94. We can convert elevations in inches MSL to elevations
-in inches (MLLW) as follows:
+in inches MLLW) as follows:
 
 \[
 E_{MLLW} = E_{MSL} + (4.94 ft\times \frac{12 in}{1 ft})
@@ -88,7 +88,14 @@ not to use it.
 sibfldnm <- 'Original Data'
 parent <- dirname(getwd())
 sibling <- file.path(parent,sibfldnm)
+
+dir.create(file.path(getwd(), 'figures'), showWarnings = FALSE)
+```
+
+``` r
+
 fn <- '8418150_meantrend.csv'
+
 fpath <- file.path(sibling, fn)
 
 slr_data  <- read_csv(fpath, 
@@ -188,10 +195,9 @@ plt + geom_text(aes(x = as.Date('2000-01-01'), y = 53),
 
 ``` r
 
-ggsave('Portland_SLR_mllw_revised.png', type='cairo',
-        width = 7, height = 5)
-#> Warning: Removed 59 row(s) containing missing values (geom_path).
-ggsave('Portland_SLR_mllw_revised.pdf', 
+# ggsave('figures/Portland_SLR_mllw_revised.png', type='cairo',
+#         width = 7, height = 5)
+ggsave('figures/Portland_SLR_mllw_revised.pdf', 
        device = cairo_pdf, width = 7, height = 5)
 #> Warning: Removed 59 row(s) containing missing values (geom_path).
 ```
