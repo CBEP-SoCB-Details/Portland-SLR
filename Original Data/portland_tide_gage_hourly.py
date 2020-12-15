@@ -60,7 +60,7 @@ def adddata(thefilename, theresponse):
                 except ValueError:  # If you can't parse the line, skip it!
                     continue
                 outfile.write(lst[0] + ',' + thedate + ',' +
-                              thetime + ',' + lst[1] + lst[2] + '\n')
+                              thetime + ',' + lst[1] + ',' + lst[2] + '\n')
 if __name__ == '__main__':
     thefile = 'portland_tides_hourly.csv'
     setupfile(thefile)   # this will erase any file with the same name.
