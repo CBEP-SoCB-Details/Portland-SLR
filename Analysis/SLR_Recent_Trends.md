@@ -768,7 +768,8 @@ plt
 
 ``` r
 plt +facet_wrap(~Span) +
-  theme(axis.text.x = element_text(size = 10, angle = 90, vjust = 0.25))
+  theme(axis.text.x = element_text(size = 10, angle = 90, vjust = 0.25)) +
+  theme(legend.position = "none")
 ```
 
 <img src="SLR_Recent_Trends_files/figure-gfm/panl_line_graph-1.png" style="display: block; margin: auto;" />

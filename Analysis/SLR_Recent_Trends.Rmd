@@ -528,7 +528,8 @@ plt
 
 ```{r panl_line_graph, fig.width = 7, fig.height = 5}
 plt +facet_wrap(~Span) +
-  theme(axis.text.x = element_text(size = 10, angle = 90, vjust = 0.25))
+  theme(axis.text.x = element_text(size = 10, angle = 90, vjust = 0.25)) +
+  theme(legend.position = "none")
 ```
 
 
