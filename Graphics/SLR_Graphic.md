@@ -26,12 +26,12 @@ monthly values, we need only plot NOAA data, with minimal processing.
 
 ``` r
 library(tidyverse)
-#> -- Attaching packages ----------------------------------------------------------------------------------- tidyverse 1.3.0 --
+#> -- Attaching packages ----------------------------------------------------------------------- tidyverse 1.3.0 --
 #> v ggplot2 3.3.2     v purrr   0.3.4
-#> v tibble  3.0.1     v dplyr   1.0.0
-#> v tidyr   1.1.0     v stringr 1.4.0
+#> v tibble  3.0.3     v dplyr   1.0.2
+#> v tidyr   1.1.2     v stringr 1.4.0
 #> v readr   1.3.1     v forcats 0.5.0
-#> -- Conflicts -------------------------------------------------------------------------------------- tidyverse_conflicts() --
+#> -- Conflicts -------------------------------------------------------------------------- tidyverse_conflicts() --
 #> x dplyr::filter() masks stats::filter()
 #> x dplyr::lag()    masks stats::lag()
 library(readr)
@@ -100,13 +100,13 @@ slr_data  <- read_csv(fpath,
          MLLW_in = MSL_in +(4.94*12),
          RSL_in = MSL_in + 10)
 #> Warning: 1299 parsing failures.
-#> row col  expected    actual                                                                                   file
-#>   1  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Dropbox/Work/Portland-SLR/Original Data/8418150_meantrend.csv'
-#>   2  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Dropbox/Work/Portland-SLR/Original Data/8418150_meantrend.csv'
-#>   3  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Dropbox/Work/Portland-SLR/Original Data/8418150_meantrend.csv'
-#>   4  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Dropbox/Work/Portland-SLR/Original Data/8418150_meantrend.csv'
-#>   5  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Dropbox/Work/Portland-SLR/Original Data/8418150_meantrend.csv'
-#> ... ... ......... ......... ......................................................................................
+#> row col  expected    actual                                                                                                                              file
+#>   1  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
+#>   2  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
+#>   3  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
+#>   4  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
+#>   5  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
+#> ... ... ......... ......... .................................................................................................................................
 #> See problems(...) for more details.
 ```
 
@@ -116,11 +116,15 @@ We use a linear model analysis to compare results to the linear trend
 reported by NOAA on the source web page. NOAA reports the rate of sea
 level rise in millimeters as \(1.9 \pm 0.14 mm /yr\).
 
-Since the NOAA data, although monthly, are reported by date, the model
-coefficients are expressed in DAYS,. To find the relevant annual rate of
-sea level rise, we need to multiply both estimate (slope) and its
-standard error by 365.25 (approximate length of a year in days) and then
-multiply again by 1000 to convert from meters to millimeters.
+The NOAA data are reported monthly, but to take advantage of the Date
+class in R, we expressed monthly data as relating to the fifteenth of
+each month.
+
+As a result, our model coefficients are expressed in units per DAY. To
+find the relevant annual rate of sea level rise, we need to multiply
+both estimate (slope) and its standard error by 365.25 (approximate
+length of a year in days) and then multiply again by 1000 to convert
+from meters to millimeters.
 
 The estimate from a simple linear model matches NOAA’s reported
 estimate, but the standard error and derived 95% confidence interval are

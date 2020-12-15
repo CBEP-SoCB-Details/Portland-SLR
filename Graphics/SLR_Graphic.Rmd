@@ -72,11 +72,23 @@ slr_data  <- read_csv(fpath,
 ```
 
 # Estimating the Linear Trend  
-We use a linear model analysis to compare results to the linear trend reported by NOAA on the source web page.  NOAA reports the rate of sea level rise in millimeters as $1.9 \pm 0.14 mm /yr$. 
+We use a linear model analysis to compare results to the linear trend reported
+by NOAA on the source web page.  NOAA reports the rate of sea level rise in
+millimeters as $1.9 \pm 0.14 mm /yr$.
 
-Since the NOAA data, although monthly, are reported by date, the model coefficients are expressed in DAYS,. To find the relevant annual rate of sea level rise, we need to multiply both estimate (slope) and its standard error by 365.25 (approximate length of a year in days) and then multiply again by 1000 to convert from meters to millimeters.  
+The NOAA data are reported monthly, but to take advantage of the Date class in
+R, we expressed monthly data as relating to the fifteenth of each month.  
 
-The estimate from a simple linear model matches NOAA's reported estimate, but the standard error and derived 95% confidence interval are  considerably narrower.  NOAA appropriately treated this as an auto-correlated time series, instead of simply as a linear model. We do the same, specifying and autoregressive error function of order 1.  
+As a result, our model coefficients are expressed in units per DAY. To find the
+relevant annual rate of sea level rise, we need to multiply both estimate
+(slope) and its standard error by 365.25 (approximate length of a year in days)
+and then multiply again by 1000 to convert from meters to millimeters.
+
+The estimate from a simple linear model matches NOAA's reported estimate, but
+the standard error and derived 95% confidence interval are  considerably
+narrower.  NOAA appropriately treated this as an auto-correlated time series,
+instead of simply as a linear model. We do the same, specifying and
+autoregressive error function of order 1.
 
 ```{r slr_gls}
 the_gls <- gls(MSL~theDate, data=slr_data, correlation = corAR1())
