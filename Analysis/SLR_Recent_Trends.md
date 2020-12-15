@@ -757,7 +757,7 @@ plt <- ggplot(results, aes(x = EndYear, y = AnnSlopemm)) +
          geom_line(aes(color = Span), size = 1) +
   
   xlab('Final Year of Period') +
-  ylab('Slope (mm per year)') +
+  ylab('Rate of SLR (mm per year)') +
   
   scale_color_manual(values = cbep_colors(), name = 'Period Length') +
   scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020))
