@@ -203,7 +203,7 @@ plt <- ggplot(obs_annual, aes(Year, prob_flood)) +
   geom_line(aes(y = predict),
             color = cbep_colors()[5]) +
   
-  ylab('Daily Probability of\nTidal Flooding' ) +
+  ylab('Daily Probability of\nCoastal Flooding' ) +
 
   scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020)) +
     
@@ -256,7 +256,7 @@ plt2 <- ggplot(obs_annual, aes(Year, Floods)) +
   geom_line(aes(y = predict * 365),
             color = cbep_colors()[5]) +
   
-  ylab('Days with Tidal Flooding' ) +
+  ylab('Days with Coastal Flooding') +
   
   scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020)) +
     
