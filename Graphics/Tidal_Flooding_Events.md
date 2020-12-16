@@ -10,8 +10,10 @@ December 14, 2020
   - [Generalized Linear Model](#generalized-linear-model)
       - [Graphics Showing Model
         Results](#graphics-showing-model-results)
-          - [Alternate Graphic](#alternate-graphic)
-  - [Annotated Graphic](#annotated-graphic)
+          - [Daily Probability of
+            Flooding](#daily-probability-of-flooding)
+          - [Number of Days of with Recorded
+            Flooding](#number-of-days-of-with-recorded-flooding)
 
 <img
     src="https://www.cascobayestuary.org/wp-content/uploads/2014/04/logo_sm.jpg"
@@ -193,50 +195,44 @@ obs_annual <- obs_annual %>%
   mutate(predict = predict(the_glm, type = 'response'))
 ```
 
+### Daily Probability of Flooding
+
 ``` r
 plt <- ggplot(obs_annual, aes(Year, prob_flood)) +
   geom_point(color =cbep_colors()[4]) +
   geom_line(aes(y = predict),
             color = cbep_colors()[5]) +
   
-  ylab('Daily Probability of\nTidal Flooding' )
+  ylab('Daily Probability of\nTidal Flooding' ) +
+
+  scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020)) +
+    
+  theme_cbep(base_size = 12)
 
 plt
 ```
 
 <img src="Tidal_Flooding_Events_files/figure-gfm/unnamed-chunk-8-1.png" style="display: block; margin: auto;" />
 
-### Alternate Graphic
-
-``` r
-ggplot(obs_annual, aes(Year, prob_flood * 365)) +
-  geom_point(color =cbep_colors()[4]) +
-  geom_line(aes(y = predict * 365),
-            color = cbep_colors()[5]) +
-  
-  ylab('Estimated Days of\nTidal Flooding' )
-```
-
-<img src="Tidal_Flooding_Events_files/figure-gfm/unnamed-chunk-9-1.png" style="display: block; margin: auto;" />
-
 ``` r
 annot_data <- obs_annual %>%
   filter(Year %in% c(1912, 2019)) %>%
-  mutate(annot = paste("About", 
+  mutate(annot = paste("\u2213", 
                        round(365 * predict,1),
-                       '\nFloods per Year'),
+                       'Floods\nper Year'),
          height = c(0.02, 0.05)) %>%
   
   select(Year, height, annot)
 annot_data
 #> # A tibble: 2 x 3
-#>    Year height annot                        
-#>   <dbl>  <dbl> <chr>                        
-#> 1  1912   0.02 "About 0.6 \nFloods per Year"
-#> 2  2019   0.05 "About 8.4 \nFloods per Year"
+#>    Year height annot                   
+#>   <dbl>  <dbl> <chr>                   
+#> 1  1912   0.02 "± 0.6 Floods\nper Year"
+#> 2  2019   0.05 "± 8.4 Floods\nper Year"
 ```
 
-# Annotated Graphic
+Unfortunately this font, and default fonts do not have the +/- glyph, so
+we get an empty square box.
 
 ``` r
 plt +
@@ -245,3 +241,58 @@ plt +
 ```
 
 <img src="Tidal_Flooding_Events_files/figure-gfm/annotate_graphic-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+ggsave('figures/Portland_tidal_flooding.pdf', 
+       device = cairo_pdf, width = 5, height = 3)
+```
+
+### Number of Days of with Recorded Flooding
+
+``` r
+plt2 <- ggplot(obs_annual, aes(Year, Floods)) +
+  geom_point(color =cbep_colors()[4]) +
+  geom_line(aes(y = predict * 365),
+            color = cbep_colors()[5]) +
+  
+  ylab('Days with Tidal Flooding' ) +
+  
+  scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020)) +
+    
+  theme_cbep(base_size = 12)
+plt2
+```
+
+<img src="Tidal_Flooding_Events_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+
+``` r
+annot_data <- obs_annual %>%
+  filter(Year %in% c(1912, 2019)) %>%
+  mutate(annot = paste("\u2213", 
+                       round(365 * predict,1),
+                       'Floods\nper Year'),
+         height = c(7, 18)) %>%
+  
+  select(Year, height, annot)
+annot_data
+#> # A tibble: 2 x 3
+#>    Year height annot                   
+#>   <dbl>  <dbl> <chr>                   
+#> 1  1912      7 "± 0.6 Floods\nper Year"
+#> 2  2019     18 "± 8.4 Floods\nper Year"
+```
+
+``` r
+plt2 +
+  geom_text(aes(x = Year, y = height, label = annot, hjust = c(0,1)),
+            data = annot_data, size = 3)
+```
+
+<img src="Tidal_Flooding_Events_files/figure-gfm/annotate_graphic_alt-1.png" style="display: block; margin: auto;" />
+
+``` r
+
+ggsave('figures/Portland_tidal_flooding_alt.pdf', 
+       device = cairo_pdf, width = 5, height = 3)
+```

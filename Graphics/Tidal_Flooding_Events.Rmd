@@ -141,46 +141,79 @@ obs_annual <- obs_annual %>%
   mutate(predict = predict(the_glm, type = 'response'))
 ```
 
-
+### Daily Probability of Flooding
 ```{r}
 plt <- ggplot(obs_annual, aes(Year, prob_flood)) +
   geom_point(color =cbep_colors()[4]) +
   geom_line(aes(y = predict),
             color = cbep_colors()[5]) +
   
-  ylab('Daily Probability of\nTidal Flooding' )
+  ylab('Daily Probability of\nTidal Flooding' ) +
+
+  scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020)) +
+    
+  theme_cbep(base_size = 12)
 
 plt
 ```
 
-### Alternate Graphic 
-```{r}
-ggplot(obs_annual, aes(Year, prob_flood * 365)) +
-  geom_point(color =cbep_colors()[4]) +
-  geom_line(aes(y = predict * 365),
-            color = cbep_colors()[5]) +
-  
-  ylab('Estimated Days of\nTidal Flooding' )
-```
-
-
-
-
 ```{r}
 annot_data <- obs_annual %>%
   filter(Year %in% c(1912, 2019)) %>%
-  mutate(annot = paste("About", 
+  mutate(annot = paste("\u2213", 
                        round(365 * predict,1),
-                       '\nFloods per Year'),
+                       'Floods\nper Year'),
          height = c(0.02, 0.05)) %>%
   
   select(Year, height, annot)
 annot_data
 ```
-# Annotated Graphic
+
+Unfortunately this font, and default fonts do not have the +/- glyph, so we get
+an empty square box.
 ```{r annotate_graphic}
 plt +
   geom_text(aes(x = Year, y = height, label = annot, hjust = c(0,1)),
             data = annot_data, size = 3)
+
+ggsave('figures/Portland_tidal_flooding.pdf', 
+       device = cairo_pdf, width = 5, height = 3)
+```
+
+### Number of Days of with Recorded Flooding  
+```{r}
+plt2 <- ggplot(obs_annual, aes(Year, Floods)) +
+  geom_point(color =cbep_colors()[4]) +
+  geom_line(aes(y = predict * 365),
+            color = cbep_colors()[5]) +
+  
+  ylab('Days with Tidal Flooding' ) +
+  
+  scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020)) +
+    
+  theme_cbep(base_size = 12)
+plt2
+```
+
+
+```{r}
+annot_data <- obs_annual %>%
+  filter(Year %in% c(1912, 2019)) %>%
+  mutate(annot = paste("\u2213", 
+                       round(365 * predict,1),
+                       'Floods\nper Year'),
+         height = c(7, 18)) %>%
+  
+  select(Year, height, annot)
+annot_data
+```
+
+```{r annotate_graphic_alt}
+plt2 +
+  geom_text(aes(x = Year, y = height, label = annot, hjust = c(0,1)),
+            data = annot_data, size = 3)
+
+ggsave('figures/Portland_tidal_flooding_alt.pdf', 
+       device = cairo_pdf, width = 5, height = 3)
 ```
 
