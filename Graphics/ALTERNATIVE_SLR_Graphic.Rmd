@@ -1,0 +1,309 @@
+---
+title: "Alternative Graphics for Sea Level Rise at Portland, Maine"
+author: Curtis C. Bohlen
+output:
+  github_document:
+    toc: true
+    fig_width: 7
+    fig_height: 5
+---
+
+<img
+    src="https://www.cascobayestuary.org/wp-content/uploads/2014/04/logo_sm.jpg"
+    style="position:absolute;top:10px;right:50px;" />
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.align = 'center',
+                      fig.width = 5, fig.height = 4,
+                      collapse = TRUE, comment = "#>")
+```
+ 
+# Introduction
+Here we prepare alternate graphics for depicting local sea level rise in Portland.  All data is derived from NOAA Tides and Currents or COPS data for the tide gauge in Portland, Maine.  Since NOAA provides clean data as monthly values, we need only plot NOAA data, with minimal processing.
+
+# Import Libraries
+```{r libraries}
+library(tidyverse)
+library(readr)
+
+library(zoo)     # for the rollmean function
+
+library(nlme)    # for gls
+
+library(CBEPgraphics)
+
+load_cbep_fonts()
+```
+
+
+# Import Data
+Our primary source data is based on NOAA's analysis of sea level trends.  The
+description on the source web site
+(https://tidesandcurrents.noaa.gov/datums.html?id=8418150) says the following,
+so this is apparently NOT raw data.
+
+> "The plot shows the monthly mean sea level without the regular seasonal
+fluctuations due to coastal ocean temperatures, salinities, winds,
+atmospheric pressures, and ocean currents. ... The plotted values are relative
+to the most recent Mean Sea Level datum established by CO-OPS."
+
+For convenience, we want to be able to report these elevations as positive
+values, which makes it easier for readers to compare elevations.  NOAA uses a
+datum of MLLW for charting purposes.  We follow that practice here.
+
+According to https://tidesandcurrents.noaa.gov/datums.html?id=8418150, 
+at Portland, MLLW has an elevation (in feet) of 0.0 , while MSL has an elevation
+of 4.94.  We can convert elevations in inches MSL to elevations in inches 
+MLLW) as follows:  
+
+$$
+E_{MLLW} = E_{MSL} + (4.94 ft\times \frac{12 in}{1 ft})
+$$
+An alternative is to declare some other arbitrary sea level datum as a "Relative
+Sea Level."  We prepare a graphic that way, below, but chose not to use it.
+
+```{r folders}
+sibfldnm <- 'Original Data'
+parent <- dirname(getwd())
+sibling <- file.path(parent,sibfldnm)
+
+dir.create(file.path(getwd(), 'figures'), showWarnings = FALSE)
+```
+
+```{r load_data} 
+
+fn <- '8418150_meantrend.csv'
+
+fpath <- file.path(sibling, fn)
+
+slr_data  <- read_csv(fpath, skip = 1,
+                      col_names = c('Year', 'Month', 'Monthly_MSL', 
+                                    'Unverified', 'Linear_Trend', 'High_Conf.', 
+                                    'Low_Conf.', 'Empty'),
+                      col_types = "iidddddd") %>%
+  select(-Empty, -Unverified) %>%
+  rename(MSL = Monthly_MSL) %>%
+  mutate(theDate = as.Date(paste0(Year,'/', Month,'/',15), format = '%Y/%m/%d')) %>%
+  mutate(MSL_ft  = MSL * 3.28084,
+         MSL_in  = MSL_ft * 12,
+         MLLW    = MSL + 	1.506,
+         MLLW_ft = MLLW  * 3.28084,
+         MLLW_in = MLLW_ft * 12)
+```
+
+# Mimic the NOAA Graphic
+This a redrawing of the NOAA "Mean Sea Level Trend" graphic for Portland. I have
+added a 24 month (2 year) moving average.
+
+## In Meters MSL
+```{r plot_slr_meters, fig.width = 2.5, fig.height = 2.25}
+ggplot(slr_data, aes(theDate, MSL)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MSL,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  xlab('') + 
+  ylab('Monthly Average Tide Level\n(m, MSL)')
+
+ggsave('figures/Portland_SLR_meters_msl.pdf', 
+       device = cairo_pdf, width = 2.25, height = 2.25)
+
+```
+```{r plot_slr_meters_bare, fig.width = 2, fig.height = 2}
+ggplot(slr_data, aes(theDate, MSL)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MSL,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank()) +
+  xlab('') + 
+  ylab('')
+
+ggsave('figures/Portland_SLR_meters_msl_bare.pdf', 
+       device = cairo_pdf, width = 2, height = 2)
+
+```
+
+
+## In Feet, MSL
+```{r plot_slr_feet, fig.width = 2.5, fig.height = 2.25}
+ggplot(slr_data, aes(theDate, MSL_ft)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MSL_ft,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  xlab('') + 
+  ylab('Monthly Average Tide Level\n(ft, MSL)')
+
+ggsave('figures/Portland_SLR_feet_msl.pdf', 
+       device = cairo_pdf, width = 2.25, height = 2.25)
+
+```
+
+```{r plot_slr_feet_bare, fig.width = 2, fig.height = 2}
+ggplot(slr_data, aes(theDate, MSL_ft)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MSL_ft,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank()) +
+  xlab('') + 
+  ylab('')
+
+ggsave('figures/Portland_SLR_feet_msl_bare.pdf', 
+       device = cairo_pdf, width = 2, height = 2)
+
+```
+
+## In Inches, MSL
+```{r plot_slr_inches, fig.width = 2.5, fig.height = 2.25}
+ggplot(slr_data, aes(theDate, MSL_in)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MSL_in,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  xlab('') + 
+  ylab('Monthly Average Tide Level\n(in, MSL)')
+
+ggsave('figures/Portland_SLR_inches_msl.pdf', 
+       device = cairo_pdf, width = 2.25, height = 2.25)
+
+```
+
+```{r plot_slr_inches_bare, fig.width = 2, fig.height = 2}
+ggplot(slr_data, aes(theDate, MSL_in)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MSL_in,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank()) +
+  xlab('') + 
+  ylab('')
+
+ggsave('figures/Portland_SLR_inches_msl_bare.pdf', 
+       device = cairo_pdf, width = 2, height = 2)
+
+```
+
+
+## In Meters MLLW
+```{r plot_slr_meters_mllw, fig.width = 2.5, fig.height = 2.25}
+ggplot(slr_data, aes(theDate, MLLW)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MLLW,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  xlab('') + 
+  ylab('Monthly Average Tide Level\n(m, MLLW)')
+
+ggsave('figures/Portland_SLR_meters_mllw.pdf', 
+       device = cairo_pdf, width = 2.25, height = 2.25)
+
+```
+
+```{r plot_slr_meters_mllw_bare, fig.width = 2, fig.height = 2}
+ggplot(slr_data, aes(theDate, MLLW)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MLLW,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank()) +
+  xlab('') + 
+  ylab('')
+
+ggsave('figures/Portland_SLR_meters_mllw_bare.pdf', 
+       device = cairo_pdf, width = 2, height = 2)
+
+```
+
+## In Feet, MLLW
+```{r plot_slr_feet_mllw, fig.width = 2.5, fig.height = 2.25}
+ggplot(slr_data, aes(theDate, MLLW_ft)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MLLW_ft,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  xlab('') + 
+  ylab('Monthly Average Tide Level\n(ft, MLLW)')
+
+ggsave('figures/Portland_SLR_feet_mllw.pdf', 
+       device = cairo_pdf, width = 2.25, height = 2.25)
+
+```
+
+```{r plot_slr_feet_mllw__bare, fig.width = 2, fig.height = 2}
+ggplot(slr_data, aes(theDate, MLLW_ft)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MLLW_ft,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank()) +
+  xlab('') + 
+  ylab('')
+
+ggsave('figures/Portland_SLR_feet_mllw_bare.pdf', 
+       device = cairo_pdf, width = 2, height = 2)
+
+```
+
+## In Inches, MLLW
+```{r plot_slr_inches_mllw, fig.width = 2.5, fig.height = 2.25}
+ggplot(slr_data, aes(theDate, MLLW_in)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MLLW_in,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  xlab('') + 
+  ylab('Monthly Average Tide Level\n(in, MLLW)')
+
+ggsave('figures/Portland_SLR_inches_mllw.pdf', 
+       device = cairo_pdf, width = 2.25, height = 2.25)
+```
+
+```{r plot_slr_inches_mllw_bare, fig.width = 2, fig.height = 2}
+ggplot(slr_data, aes(theDate, MSL_in)) + 
+  geom_line(color=cbep_colors()[1], alpha = 0.25, size = 0.5) +
+  geom_line(aes(y=rollmean(MSL_in,24, na.pad=TRUE)), 
+            color=cbep_colors()[2], size = 0.5) +
+  geom_smooth(method='lm', se=FALSE, color='red3', size = 0.5) + 
+  
+  theme_cbep(base_size = 8) + 
+  theme(axis.text = element_blank(), 
+        axis.title = element_blank()) +
+  xlab('') + 
+  ylab('')
+
+ggsave('figures/Portland_SLR_inches_mllw_bare.pdf', 
+       device = cairo_pdf, width = 2, height = 2)
+```
+
+
+
