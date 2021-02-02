@@ -1,43 +1,44 @@
-How Will SLR Increase Risk of Tidal flooding?
+How Will SLR Increase Risk of Tidal Flooding?
 ================
 Curtis C. Bohlen
 December 16, 2020
 
-  - [Introduction](#introduction)
-  - [Import Libraries](#import-libraries)
-  - [Import Data](#import-data)
-      - [Combine Data](#combine-data)
-  - [Reprise the MGS Analysis](#reprise-the-mgs-analysis)
-      - [Cleanup](#cleanup)
-  - [Evaluating Data for Simulations](#evaluating-data-for-simulations)
-      - [Long Term trend](#long-term-trend)
-          - [Focus on Official Tidal
-            Epoch](#focus-on-official-tidal-epoch)
-      - [Distribution of Deviations](#distribution-of-deviations)
-          - [Caclulate the Moments of the
-            Distribution](#caclulate-the-moments-of-the-distribution)
-          - [Conclusion](#conclusion)
-      - [Temporal Autocorrelation](#temporal-autocorrelation)
-          - [Conclusions](#conclusions)
-  - [Simulation Models](#simulation-models)
-      - [Resampling Model](#resampling-model)
-          - [Evaluating Resampled
+-   [Introduction](#introduction)
+-   [Import Libraries](#import-libraries)
+-   [Import Data](#import-data)
+    -   [Combine Data](#combine-data)
+-   [Reprise the MGS Analysis](#reprise-the-mgs-analysis)
+    -   [Cleanup](#cleanup)
+-   [Evaluating Data for Simulations](#evaluating-data-for-simulations)
+    -   [Long Term trend](#long-term-trend)
+        -   [Focus on The Official Tidal
+            Epoch](#focus-on-the-official-tidal-epoch)
+    -   [Distribution of Deviations](#distribution-of-deviations)
+        -   [Calculate the Moments of the
+            Distribution](#calculate-the-moments-of-the-distribution)
+        -   [Conclusion](#conclusion)
+    -   [Temporal Autocorrelation](#temporal-autocorrelation)
+        -   [Conclusions](#conclusions)
+-   [Simulation Models](#simulation-models)
+    -   [Resampling Model](#resampling-model)
+        -   [Evaluating Resampled
             Deviations](#evaluating-resampled-deviations)
-          - [Resampling Function](#resampling-function)
-          - [Test Our Function](#test-our-function)
-          - [Run Full Simulation](#run-full-simulation)
-      - [ARIMA Analysis](#arima-analysis)
-          - [Developing an ARIMA model](#developing-an-arima-model)
-          - [Evaluating ARIMA
+        -   [Resampling Function](#resampling-function)
+        -   [Test Our Function](#test-our-function)
+        -   [Run Full Simulation](#run-full-simulation)
+    -   [ARIMA Models](#arima-models)
+        -   [Developing an ARIMA
+            Simulator](#developing-an-arima-simulator)
+        -   [Evaluating ARIMA
             Simulations](#evaluating-arima-simulations)
-          - [Simulation Function](#simulation-function)
-          - [Test Our Function](#test-our-function-1)
-          - [Run Full Simulation](#run-full-simulation-1)
-  - [Wrapping it all up](#wrapping-it-all-up)
-      - [Direct Computation](#direct-computation)
-      - [Resampling](#resampling)
-      - [ARIMA](#arima)
-  - [Updated Simulation](#updated-simulation)
+        -   [Simulation Function](#simulation-function)
+        -   [Test Our Function](#test-our-function-1)
+        -   [Run Full Simulation](#run-full-simulation-1)
+-   [Wrapping it all up](#wrapping-it-all-up)
+    -   [Direct Computation](#direct-computation)
+    -   [Resampling](#resampling)
+    -   [ARIMA](#arima)
+-   [Updated Simulation](#updated-simulation)
 
 <img
     src="https://www.cascobayestuary.org/wp-content/uploads/2014/04/logo_sm.jpg"
@@ -87,8 +88,8 @@ models under one foot, two foot, and three foot SLR scenarios.
 ``` r
 library(tidyverse)
 #> -- Attaching packages --------------------------------------- tidyverse 1.3.0 --
-#> v ggplot2 3.3.2     v purrr   0.3.4
-#> v tibble  3.0.4     v dplyr   1.0.2
+#> v ggplot2 3.3.3     v purrr   0.3.4
+#> v tibble  3.0.5     v dplyr   1.0.3
 #> v tidyr   1.1.2     v stringr 1.4.0
 #> v readr   1.4.0     v forcats 0.5.0
 #> -- Conflicts ------------------------------------------ tidyverse_conflicts() --
@@ -113,7 +114,7 @@ Our primary source data is hourly data on observed and predicted water
 levels at the Portland tide station (Station 8418150). We accessed these
 data using small python scripts to download and assemble consistent data
 from the NOAA Tides and Currents API. Details are provided in the
-“Original Data” folder.
+“Original\_Data” folder.
 
 ``` r
 sibfldnm <- 'Original Data'
@@ -178,7 +179,7 @@ with coastal flooding.
 
 We take the same approach to identify hours with coastal flooding under
 one foot, two foot, and three foot SLR scenarios (MGS used 0.8 and 1.5
-foot scenarios), and then count **days** in which flooding occurs. We
+foot scenarios), but then count **days** in which flooding occurs. We
 focus on impact of moderate SLR on coastal flooding compared to the
 frequency of flooding observed over the past 20 years.
 
@@ -237,8 +238,8 @@ rm(summ, observed_data, predict_data)
 # Evaluating Data for Simulations
 
 We continue, working with data where tide levels are expressed in meters
-above. Here we evaluate the data in terms of how best to simulate future
-flooding events.
+above MLW. Here we evaluate the data in terms of how best to simulate
+future flooding events.
 
 ## Long Term trend
 
@@ -251,7 +252,7 @@ ggplot(combined, aes(DateTime, deviation)) +
 #> Warning: Removed 22718 rows containing missing values (geom_point).
 ```
 
-<img src="Future_Tidal_Flooding_Events_files/figure-gfm/trend_in_deviations-1.png" style="display: block; margin: auto;" />
+<img src="Future_Tidal_Flooding_Events_files/figure-gfm/trend_in_deviations_plot-1.png" style="display: block; margin: auto;" />
 
 ``` r
 test <- lm(deviation ~ theDate, data = combined)
@@ -275,16 +276,18 @@ the deviations between predicted and observed water levels. Not
 coincidentally, that value is remarkably close to the long-term estimate
 of SLR at the Portland station.
 
+### Focus on The Official Tidal Epoch
+
 Tidal predictions are defined in terms of a specific 19 year long “Tidal
 Epoch.” The astronomical alignments of sun, moon, and earth repeat (at
-least closely enough for tidal prediction) every ninteen years, and
+least closely enough for tidal prediction) every nineteen years, and
 tides are predicted based on astronomical processes. Tidal “Predictions”
 are based on a complex periodic function that is parameterized by
 “harmonic constituents”, themselves calculated based on observed tidal
 elevations over the 19 year Tidal Epoch.
 
 The current tidal epoch for Portland is 1983-2001. (According to the
-NOAA web page for the station: the epoch is provided on the datums
+NOAA web page for the station. The epoch is provided on the datums
 sub-page.)
 
 For our purposes, the key insight is that tidal predictions are
@@ -297,8 +300,6 @@ be zero (or very close to zero). Our best understanding of the
 distribution of deviations from (astronomical) predicted tide
 elevations, therefore, would come from looking at deviations during that
 tidal epoch, when deviations due to changing sea level are minimized.
-
-### Focus on Official Tidal Epoch
 
 ``` r
 epoch <- combined %>%
@@ -321,10 +322,11 @@ entire period of record, at less than a mm a year.
 ## Distribution of Deviations
 
 We need to figure out how best to model future deviations between
-observed and predicted tide leels. In particular, we need to identify
-strategies for creating a reasonable “random” version of deviations.
+observed and predicted tide levels. In particular, we need to identify
+strategies for creating a reasonable “random” version of deviations so
+that we can simulate future conditions.
 
-Values of Tide Levels in the rest of the Notebook are in meters.
+**Values of Tide Levels in the rest of the Notebook are in meters.**
 
 ``` r
 ggplot() +
@@ -341,12 +343,13 @@ ggplot() +
 ```
 
 <img src="Future_Tidal_Flooding_Events_files/figure-gfm/hist_deviations-1.png" style="display: block; margin: auto;" />
-So, deviations are close to normally distributed, with mean close to
-zero. I am certain that the mean close to zero is not by chance, but the
-nearly normal distribution reflects something about the nature of
-atmospheric and other non-astronomical effects on local sea level.
+So, deviations are “close” to normally distributed, or at least bell
+shaped, with mean close to zero. A mean close to zero is not due to
+chance, but the nearly normal distribution reflects something about the
+nature of atmospheric and other non-astronomical effects on local sea
+level.
 
-### Caclulate the Moments of the Distribution
+### Calculate the Moments of the Distribution
 
 ``` r
 mean(epoch$deviation, na.rm = TRUE)
@@ -448,13 +451,13 @@ simulated deviations to predicted tides.
 4.  Count up the number of days with simulated flood events over the
     tidal epoch, and divide by 365.25 to estimate floods per year.
 
-IN each Modsle simulate 1000 mock tidal epochs, and look at properties
+In each Model, simulate 1000 mock tidal epochs, and look at properties
 of the resulting distribution of estimated rates of flooding per year.
 
-This first model resamples deviations from the historically observed
-deviations from predicted tides.
-
 ## Resampling Model
+
+The first model resamples deviations from the historically observed
+deviations from predicted tides.
 
 ### Evaluating Resampled Deviations
 
@@ -465,10 +468,6 @@ values of the deviation between predicted and observed tidal levels.
 tmp <-  epoch$deviation[! is.na(epoch$deviation)] # don't sample NAs
 test <- sample(tmp, length(epoch$deviation), replace = TRUE)
 ```
-
-geom\_histogram(aes(x = res, y = ..density..)) + geom\_density(aes(x =
-res), color = ‘red’) + stat\_function(fun = dnorm, args = list(mean =
-mean(res), sd = sd(res)), color = ‘blue’)
 
 ``` r
 ggplot() + 
@@ -486,27 +485,29 @@ is a simulation).
 
 ``` r
 mean(test)
-#> [1] -0.0003538244
+#> [1] -0.0005646674
 sd(test)
-#> [1] 0.1281762
+#> [1] 0.1279838
 skewness(test)
-#> [1] 0.4133068
+#> [1] 0.3821466
 kurtosis(test)
-#> [1] 5.540529
+#> [1] 5.48583
 ```
 
 Moments are remarkably similar to source data, as would be expected.
 
 ``` r
 ggplot() +
+
+  geom_line(aes(x = (1:(24*50)), y = test[1:(24*50)]), alphs = 0.75) +
   geom_line(aes(x = (1:(24*50)), y = epoch$deviation[1:(24*50)]),
-            color = 'orange', alpha = 0.5) +
-  geom_line(aes(x = (1:(24*50)), y = test[1:(24*50)])) +
+            color = 'orange', alpha = 0.75) +
    
   scale_x_continuous(breaks = seq(0, 24*100, 24*20)) +
   ylab('Deviances (m)') +
   xlab('Hours') +
   labs(subtitle = 'Black is Simulated, Orange is Observed')
+#> Warning: Ignoring unknown parameters: alphs
 ```
 
 <img src="Future_Tidal_Flooding_Events_files/figure-gfm/lines_test_resample-1.png" style="display: block; margin: auto;" />
@@ -520,6 +521,14 @@ This is the workhorse function that carries out the steps just described
 
 ``` r
 resample_once <- function(dat, pr_sl, dev, dts, slr) {
+  # data is a dataframe
+  # pr_sl is the data column containing the (astronomical) sea level predictions
+  # dev is the data column containing observed deviations from predictions
+  # dts is a data column of identifiers by date / day
+  # slr is the value for SLR for estimating future tidal elevations 
+  
+  # Returns the mean number of floods per year over the simulated tidal epoch.
+  
   
   # We quote data variables, and look them up by name
   # Caution:  there is no error checking.
@@ -537,7 +546,7 @@ resample_once <- function(dat, pr_sl, dev, dts, slr) {
   #create a dataframe, for convenient calculations
   df <- tibble(theDate = dat[[dts]], sim = val)
   
-  #Calculate results
+  #Calculate results (DAYS with tidal elevations above HAT == 3.64 m)
   res <- df %>%
     group_by(theDate)  %>%
     summarize(exceeded = any(sim > 3.640),
@@ -555,7 +564,7 @@ resample_once <- function(dat, pr_sl, dev, dts, slr) {
 
 ``` r
 resample_once(epoch, Prediction, deviation, theDate, 0)
-#> [1] 6.473451
+#> [1] 6.420821
 ```
 
 ### Run Full Simulation
@@ -595,7 +604,7 @@ ggplot() +
 
 <img src="Future_Tidal_Flooding_Events_files/figure-gfm/hist_resample_results-1.png" style="display: block; margin: auto;" />
 
-## ARIMA Analysis
+## ARIMA Models
 
 The prior analysis did not take into account the temporal
 autocorrelation of deviations from predicted tidal heights. In this
@@ -603,7 +612,7 @@ section, we take a similar simulation approach, but simulate a slightly
 more faithful representation of the distribution of deviations from
 predicted tidal heights, by simulating an ARIMA process.
 
-### Developing an ARIMA model
+### Developing an ARIMA Simulator
 
 We can fit an ARIMA model to the tidal deviations data, and then
 simulate random deviations based on the parameters we find. We fit an
@@ -619,11 +628,11 @@ deviations.
 Although our time series has a clear “seasonal” structure at roughly a
 12 or 13 hour period (half of 25 hour, which is close to the tidal cycle
 of 24 hours 50 minutes), seasonal ARIMAs are very slow to fit. Even
-first first order seasonal terms take four or five minutes to fit.
-Second order and higher terms take substantially longer. An exhaustve
-search bogged down immediately.
+first order seasonal terms take four or five minutes to fit. Second
+order and higher terms take substantially longer. An exhaustive search
+bogged down immediately.
 
-We first search for non-seasonal ARIMA models, and then refit a similar
+We first search for non-seasonal ARIMA models, and then refit similar
 seasonal models.
 
 We speed things up by setting `stepwise` and `approximation` arguments
@@ -683,20 +692,20 @@ my_arima <- auto.arima(epoch$deviation,
 acf(my_arima$residuals,  na.action = na.pass, lag.max = 24*5)
 ```
 
-<img src="Future_Tidal_Flooding_Events_files/figure-gfm/unnamed-chunk-10-1.png" style="display: block; margin: auto;" />
+<img src="Future_Tidal_Flooding_Events_files/figure-gfm/acf_arima_residuals-1.png" style="display: block; margin: auto;" />
 
 ``` r
 pacf(my_arima$residuals,  na.action = na.pass, lag.max = 24*5)
 ```
 
-<img src="Future_Tidal_Flooding_Events_files/figure-gfm/unnamed-chunk-10-2.png" style="display: block; margin: auto;" />
+<img src="Future_Tidal_Flooding_Events_files/figure-gfm/acf_arima_residuals-2.png" style="display: block; margin: auto;" />
 so we have gotten rid of most of the non-periodic structure, and the
 structure under a period of a few hours, but residuals still show
 higher-order periodic structure.
 
 #### Taking into Account the Tides
 
-This takes on the order of 20 minutes to run. WE did not search other
+This takes on the order of 20 minutes to run. We did not search other
 suitable seasonal model components, and it is quite possible a moving
 average process would be more successful.
 
@@ -719,21 +728,21 @@ seasonal_arima <- arima(ts(epoch$deviation, frequency = 25),
 acf(seasonal_arima$residuals,  na.action = na.pass, lag.max = 24*5)
 ```
 
-<img src="Future_Tidal_Flooding_Events_files/figure-gfm/unnamed-chunk-12-1.png" style="display: block; margin: auto;" />
+<img src="Future_Tidal_Flooding_Events_files/figure-gfm/acf_tidal_arima_residuals-1.png" style="display: block; margin: auto;" />
 
 ``` r
 pacf(seasonal_arima$residuals,  na.action = na.pass, lag.max = 24*5)
 ```
 
-<img src="Future_Tidal_Flooding_Events_files/figure-gfm/unnamed-chunk-12-2.png" style="display: block; margin: auto;" />
+<img src="Future_Tidal_Flooding_Events_files/figure-gfm/acf_tidal_arima_residuals-2.png" style="display: block; margin: auto;" />
 
-THis reduces, but does not eliminate the periodic components in the ACF
-and PACF. magnitudes are reduced by a third to a half.
+This reduces, but does not eliminate the periodic components in the ACF
+and PACF. Magnitudes are reduced by a third to a half.
 
 Unfortunately, base R and `forcast` have no suitable functions for
-simulating seasonal ARMIA models, although some other packages
-apparently do. WE do not continue with exploration of simulation from an
-ARIMA model
+simulating seasonal ARIMA models, although some other packages
+apparently do. We do not continue with exploration of simulation from a
+seasonal ARIMA model.
 
 ### Evaluating ARIMA Simulations
 
@@ -756,7 +765,7 @@ ggplot() +
 #> Don't know how to automatically pick scale for object of type ts. Defaulting to continuous.
 ```
 
-<img src="Future_Tidal_Flooding_Events_files/figure-gfm/unnamed-chunk-13-1.png" style="display: block; margin: auto;" />
+<img src="Future_Tidal_Flooding_Events_files/figure-gfm/histogram_arima_sim-1.png" style="display: block; margin: auto;" />
 
 The range of simulations is perhaps a little narrower than the observed
 data, but since we simulated only 1/20 the data, that is not surprising.
@@ -778,11 +787,7 @@ kurtosis(test)
 Mean and SD are OK fits. Both skewness and kurtosis are lower than the
 historical data, but not too far off.
 
-``` r
-acf(test, na.action = na.pass, lag.max = 24*5)
-```
-
-<img src="Future_Tidal_Flooding_Events_files/figure-gfm/acf_2-1.png" style="display: block; margin: auto;" />
+We also examine temporal patterns and autocorrelation.
 
 ``` r
 ggplot() +
@@ -798,29 +803,55 @@ ggplot() +
 
 <img src="Future_Tidal_Flooding_Events_files/figure-gfm/lines_test_arima_sim-1.png" style="display: block; margin: auto;" />
 
+``` r
+acf(test, na.action = na.pass, lag.max = 24*5)
+```
+
+<img src="Future_Tidal_Flooding_Events_files/figure-gfm/acf_arima_sim-1.png" style="display: block; margin: auto;" />
+
 The overall temporal pattern of the simulation looks roughly comparable.
 The autocorrelation structure shows a more rapid decrease in
 correlation, and a negative correlation pattern out about three days.
-THe modeled values lack the prominent periodic components of the real
+The modeled values lack the prominent periodic components of the real
 data. There is somewhat more long-term structure in the observed data,
 but we’re not far off.
 
 ### Simulation Function
 
+We create a function that simulates a possible timeseries of tidal
+heights. This works in direct analogy to the resampling function,
+`resample_once()`. We replace the resampling mechanism for generating a
+future stream of deviations from tidal predictions used there with one
+based on simulating an ARIMA process.
+
+Note that this function relies on existence of parameters and standard
+error from an existing ARIMA model. We pass those as parameters,
+
 ``` r
-sim_once <- function(dat, pr_sl, dev, dts, slr) {
+sim_once <- function(dat, pr_sl, dts, slr,
+                     coefs = my_coefs, 
+                     sigma2 = my_sigma2) {
+  
+  # data is a dataframe
+  # pr_sl is the data column containing the (astronomical) sea level predictions
+  # dts is a data column of identifiers by date / day
+  # slr is the value for SLR for estimating future tidal elevations 
+  # coefs is a list of coefficients as produced by arima() or auto.arima()
+  # sigma2 is the sigma2 measure of variation from arima() or  auto.arima()
+  
+  # Returns the mean number of floods per year over ONE simulated tidal epoch.
   
   # We quote data variables, and look them up by name
   # Caution:  there is no error checking.
   
   pr_sl <- as.character(ensym(pr_sl))
-  dev <- as.character(ensym(dev))
+  #dev <- as.character(ensym(dev))
   dts <- as.character(ensym(dts))
   
   #Simulate one tidal epoch of hourly tidal elevations
   val <- dat[[pr_sl]] + slr + arima.sim(n = length(dat[[pr_sl]]),
-                                 model = list(ar = my_coefs),
-                                 sd = sqrt(my_sigma2))
+                                 model = list(ar = coefs),
+                                 sd = sqrt(sigma2))
   
   #create a dataframe, for convenient calculations
   df <- tibble(theDate = dat[[dts]], sim = val)
@@ -842,20 +873,20 @@ sim_once <- function(dat, pr_sl, dev, dts, slr) {
 ### Test Our Function
 
 ``` r
-sim_once(epoch, Prediction, deviation, theDate, 0)
+sim_once(epoch, Prediction, theDate, 0)
 #> [1] 4.420893
 ```
 
 ### Run Full Simulation
 
-The following takes just over a minutes to run.
+The following takes just several minutes to run.
 
 ``` r
 set.seed(54321)
 samp = 1000
 res <- numeric(samp)
 for (iter in seq(1, samp)) {
-  res[[iter]] <- sim_once(epoch, Prediction, deviation, theDate, 0)
+  res[[iter]] <- sim_once(epoch, Prediction, theDate, 0)
 }
 ```
 
@@ -876,7 +907,7 @@ Estimated number of flood days per year is slightly lower, and actually
 in better agreement with the observed number during the official tidal
 epoch.
 
-Results are close to normally distributed, but better reflect the
+Results are close to normally distributed.
 
 ``` r
 ggplot() +
@@ -924,21 +955,22 @@ slr_annual <- combined %>%
             .groups = 'drop') %>%
   
   summarize(days = sum(! is.na(exceeded_0)),
-            floods_p_yr_0 = 365.25 * sum(exceeded_0)/days,
-            floods_p_yr_1 = 365.25 * sum(exceeded_1)/days,
-            floods_p_yr_2 = 365.25 * sum(exceeded_2)/days,
-            floods_p_yr_3 = 365.25 * sum(exceeded_3)/days,
-            ratio_1 = floods_p_yr_1 / floods_p_yr_0,
-            ratio_2 = floods_p_yr_2 / floods_p_yr_0,
-            ratio_3 = floods_p_yr_3 / floods_p_yr_0,
+            `No SLR` = 365.25 * sum(exceeded_0)/days,
+            `One Foot SLR` = 365.25 * sum(exceeded_1)/days,
+            `Two Foot SLR` = 365.25 * sum(exceeded_2)/days,
+            `Three Foot SLR` = 365.25 * sum(exceeded_3)/days,
+            `One Foot` = round(`One Foot SLR` / `No SLR`, 2),
+            `Two Foot` = round(`Two Foot SLR` / `No SLR`, 2),
+            `Three Foot` = round(`Three Foot SLR` / `No SLR`, 2),
             .groups = 'drop') %>%
   select(-days)
 slr_annual
 #> # A tibble: 1 x 7
-#>   floods_p_yr_0 floods_p_yr_1 floods_p_yr_2 floods_p_yr_3 ratio_1 ratio_2
-#>           <dbl>         <dbl>         <dbl>         <dbl>   <dbl>   <dbl>
-#> 1          2.11          45.8          161.          311.    21.8    76.6
-#> # ... with 1 more variable: ratio_3 <dbl>
+#>   `No SLR` `One Foot SLR` `Two Foot SLR` `Three Foot SLR` `One Foot` `Two Foot`
+#>      <dbl>          <dbl>          <dbl>            <dbl>      <dbl>      <dbl>
+#> 1     2.11           45.8           161.             311.       21.8       76.6
+#> # ... with 1 more variable: `Three Foot` <dbl>
+v <- slr_annual$`One Foot`
 ```
 
 Under that simple model, one foot of SLR increases flooding by a
@@ -954,9 +986,9 @@ tides during that period.
 Create a function to allow us to use `map()` or `lapply()` to assemble
 results.
 
-`These`res\_auto()\` is not a fully encapsulated function, since it
-relies on the existence of a dataframe called “epoch”, with data columns
-with specific names.
+The function `res_auto()` is not fully encapsulated, since it relies on
+the existence of a dataframe called “epoch”, with data columns with
+specific names.
 
 ``` r
 res_auto <- function(slr, samp) {
@@ -968,8 +1000,9 @@ res_auto <- function(slr, samp) {
   
 ```
 
-Tee following takes a couple of minutes to run. It simulates 1000 sets
-of tide levels for each of four SLR scenarios.
+The following takes a couple of minutes to run. It simulates 1000 sets
+of tide levels for each of four SLR scenarios. It takes a couple of
+minutes to run.
 
 ``` r
 set.seed(12345)
@@ -980,13 +1013,15 @@ resamp <- lapply((0:3 * 0.3048), function(x) res_auto(x, samp))
 ``` r
 names(resamp) = c('No SLR', 'One Foot SLR', 'Two Foot SLR', 'Three Foot SLR')
 resamp <- do.call(bind_cols, resamp)
+```
 
+``` r
 resamp <- resamp %>% 
   summarize(across(everything(), mean, na.rm = TRUE)) %>%
   rowwise() %>%
-  mutate(`One Foot`   = round(`One Foot SLR`/`No SLR`,3),
-         `Two Foot`   = round(`Two Foot SLR`/`No SLR`,3),
-         `Three Foot` = round(`Three Foot SLR`/`No SLR`,3))
+  mutate(`One Foot`   = round(`One Foot SLR`/`No SLR`,2),
+         `Two Foot`   = round(`Two Foot SLR`/`No SLR`,2),
+         `Three Foot` = round(`Three Foot SLR`/`No SLR`,2))
 resamp
 #> # A tibble: 1 x 7
 #> # Rowwise: 
@@ -994,7 +1029,9 @@ resamp
 #>      <dbl>          <dbl>          <dbl>            <dbl>      <dbl>      <dbl>
 #> 1     6.04           61.9           191.             336.       10.2       31.7
 #> # ... with 1 more variable: `Three Foot` <dbl>
+```
 
+``` r
 v <- resamp$`One Foot` 
 ```
 
@@ -1013,7 +1050,7 @@ encapsulated.
 sim_auto <- function(slr, samp) {
   res <- numeric(samp)
   for (iter in seq(1, samp))
-    res[[iter]] <- sim_once(epoch, Prediction, deviation, theDate, slr)
+    res[[iter]] <- sim_once(epoch, Prediction, theDate, slr)
   return(res)
 }
   
@@ -1034,9 +1071,9 @@ simulates <- do.call(bind_cols, simulates)
 simulates <- simulates %>%
   summarize(across(everything(), mean, na.rm = TRUE)) %>%
   rowwise() %>%
-  mutate(`One Foot`   = round(`One Foot SLR`/`No SLR`,3),
-         `Two Foot`   = round(`Two Foot SLR`/`No SLR`,3),
-         `Three Foot` = round(`Three Foot SLR`/`No SLR`,3))
+  mutate(`One Foot`   = round(`One Foot SLR`/`No SLR`,2),
+         `Two Foot`   = round(`Two Foot SLR`/`No SLR`,2),
+         `Three Foot` = round(`Three Foot SLR`/`No SLR`,2))
 simulates
 #> # A tibble: 1 x 7
 #> # Rowwise: 
@@ -1051,6 +1088,21 @@ v <- simulates$`One Foot`
 This analysis suggests a one foot sea level rise would increase flooding
 by a factor of about 12.1.
 
+\#\#Make a nice Table
+
+``` r
+t <- rbind(slr_annual, resamp, simulates)
+row.names(t) <- c('Add SLR to tidal Epoch', 'Resampling Model', 'ARIMA Model')
+#> Warning: Setting row names on a tibble is deprecated.
+knitr::kable(t)
+```
+
+|                        |   No SLR | One Foot SLR | Two Foot SLR | Three Foot SLR | One Foot | Two Foot | Three Foot |
+|:-----------------------|---------:|-------------:|-------------:|---------------:|---------:|---------:|-----------:|
+| Add SLR to tidal Epoch | 2.105187 |     45.84045 |     161.2047 |       311.4098 |    21.77 |    76.58 |     147.92 |
+| Resampling Model       | 6.038519 |     61.86961 |     191.3714 |       335.5146 |    10.25 |    31.69 |      55.56 |
+| ARIMA Model            | 4.314739 |     52.18170 |     171.7737 |       318.9858 |    12.09 |    39.81 |      73.93 |
+
 # Updated Simulation
 
 Those simulations reflect conditions that held during the Tidal Epoch,
@@ -1062,12 +1114,12 @@ with one foot of *additional* SLR?
 Actual tidal levels today are several centimeters higher than during the
 tidal epoch. With average SLR on the order of 2 mm per year, observed
 elevations today should be on the order of
-\(2.0 \frac{\text{mm}}{\text{yr}} \times 19\text{ yrs} = 38 \text{ mm} \approx 1.5 \text{ in}\).
+$2.0 \\frac{\\text{mm}}{\\text{yr}} \\times 19\\text{ yrs} = 38 \\text{ mm} \\approx 1.5 \\text{ in}$.
 
 How much will our results differ if we start from a base elevation a few
-inches higher? WE can compare frequency of flooding with an extra 4 cm
-of base elevation but versus flooding an additional 4cm odfplus one foor
-of SLR
+inches higher? We can compare frequency of flooding with an extra 4 cm
+of base elevation versus flooding an additional 4cm plus one foot of
+SLR.
 
 ``` r
 simulates <- lapply((.040 + (0:1 * 0.3048)), function(x) sim_auto(x, samp))
