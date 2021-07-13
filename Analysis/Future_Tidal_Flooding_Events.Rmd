@@ -144,6 +144,7 @@ over the period of record.  (See
 ```{r mgs_analysis}
 HAT <- 11.95
 slr_annual <- observed_data %>%
+  filter(Year > 2000) %>%
   mutate(slr_1 = MLLW_ft + 1,
          slr_2 = MLLW_ft + 2,
          slr_3 = MLLW_ft + 3,
@@ -722,8 +723,7 @@ much more severe.
 Note we are working in meters here.
 ```{r direct}
 HAT <- 3.640
-slr_annual <- combined %>%
-  filter(Year> 1982 & Year < 2002) %>%
+slr_annual <- epoch %>%
   mutate(slr_1 = MLLW + 1 * 0.3048,
          slr_2 = MLLW + 2 * 0.3048,
          slr_3 = MLLW + 3 * 0.3048,
@@ -833,7 +833,7 @@ names(simulates) = c('No SLR', 'One Foot SLR', 'Two Foot SLR', 'Three Foot SLR')
 simulates <- do.call(bind_cols, simulates)
 
 simulates <- simulates %>%
-  summarize(across(everything(), mean, na.rm = TRUE)) %>%
+  summarize(across(everything(), c(mean, sd), na.rm = TRUE)) %>%
   rowwise() %>%
   mutate(`One Foot`   = round(`One Foot SLR`/`No SLR`,2),
          `Two Foot`   = round(`Two Foot SLR`/`No SLR`,2),
@@ -846,16 +846,14 @@ v <- simulates$`One Foot`
 This analysis suggests a one foot sea level rise would increase flooding by a
 factor of about `r round(v,1)`.
 
-##Make a nice Table 
+## Make a Nice Table 
 ```{r}
 t <- rbind(slr_annual, resamp, simulates)
 row.names(t) <- c('Add SLR to tidal Epoch', 'Resampling Model', 'ARIMA Model')
 knitr::kable(t)
 ```
 
-
-
-# Updated Simulation
+# Updated To Present Conditions
 Those simulations reflect conditions that held during the Tidal Epoch, from 1983
 through 2001.  Today's sea levels are slightly higher.  How would taking that
 into account affect predictions of the frequency of flooding and the relative
@@ -870,20 +868,62 @@ How much will our results differ if we start from a base elevation a few inches
 higher? We can compare frequency of flooding with an extra 4 cm of base
 elevation versus flooding an additional 4cm plus one foot of SLR.
 
+
+## Updated  Direct Computation
+Following the MGS method, but focused on the same period as our simulations for
+comparison purposes.  Note these results are VERY different from results for
+the last ten years, and in fact make the increase in flooding frequency look
+much more severe.
+
+Note we are working in meters here.
+```{r direct}
+HAT <- 3.640
+slr_annual_2 <- epoch %>%
+  mutate(slr_1 = .038 + MLLW + 1 * 0.3048,
+         slr_2 = .038 + MLLW + 2 * 0.3048,
+         slr_3 = .038 + MLLW + 3 * 0.3048,
+         exceeds_0 = MLLW   > HAT, 
+         exceeds_0.1 = 0.038 + MLLW  > HAT, 
+         exceeds_1 = slr_1   > HAT,
+         exceeds_2 = slr_2   > HAT,
+         exceeds_3 = slr_3   > HAT) %>%
+  group_by(theDate) %>%
+  summarize(exceeded_0 = any(exceeds_0, na.rm = TRUE),
+            exceeded_0.1 = any(exceeds_0.1, na.rm = TRUE),
+            exceeded_1 = any(exceeds_1, na.rm = TRUE),
+            exceeded_2 = any(exceeds_2, na.rm = TRUE),
+            exceeded_3 = any(exceeds_3, na.rm = TRUE),
+            .groups = 'drop') %>%
+  
+  summarize(days = sum(! is.na(exceeded_0)),
+            `Tidal Epoch` = 365.25 * sum(exceeded_0)/days,
+            `No SLR` = 365.25 * sum(exceeded_0.1)/days,
+            `One Foot SLR` = 365.25 * sum(exceeded_1)/days,
+            `Two Foot SLR` = 365.25 * sum(exceeded_2)/days,
+            `Three Foot SLR` = 365.25 * sum(exceeded_3)/days,
+            .groups = 'drop') %>%
+  select(-days)
+slr_annual_2
+```
+
+
+## Updated Simulation
 ```{r}
-simulates <- lapply((.040 + (0:1 * 0.3048)), function(x) sim_auto(x, samp))
+levels <- 0.038 * c(0,1,1,1,1) + (c(0,0,1,2,3) * 0.3048)
+simulates_2 <- lapply(levels, 
+                    function(x) sim_auto(x, samp))
 ```
 
 ```{r}
-names(simulates) = c('no_SLR', 'w_SLR')
-simulates <- do.call(bind_cols, simulates)
-
-simulates <- simulates %>%
-  summarize(across(everything(), mean, na.rm = TRUE)) %>%
-  rowwise() %>%
-  mutate(`ratio`   = round(w_SLR/no_SLR,3))
-simulates
+names(simulates_2) = c('Tidal Epoch', 'No SLR', 
+                       'One Foot SLR', 'Two Foot SLR', 
+                       'Three Foot SLR')
+simulates_2 <- do.call(bind_cols, simulates_2)
 ```
-So, just the SLR we have experienced over the past two decades has increased the
-number of expected flooding events by 50%, making the relative impact of
-additional SLR look slightly smaller.
+
+```{r}
+simulation <- simulates_2 %>%
+  summarize(across(everything(), c(mean, sd), na.rm = TRUE), .groups = 'drop')
+simulation
+```
+
