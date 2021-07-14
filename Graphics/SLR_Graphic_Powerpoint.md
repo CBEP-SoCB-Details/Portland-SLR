@@ -174,7 +174,7 @@ plt <- ggplot(slr_data, aes(theDate, MSL_ft)) +
   geom_smooth(method='lm', formula = y~x, se=FALSE, color=cbep_colors()[3],
               size = 1) + 
   theme_cbep() + 
-  xlab('Date') + 
+  xlab('') + 
   ylab('Monthly Mean Tide (ft, MSL)')
 
 # Add Annotation in inches Per Decade

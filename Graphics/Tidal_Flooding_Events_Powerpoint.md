@@ -165,6 +165,7 @@ plt2 <- ggplot(obs_annual, aes(Year, Floods)) +
             color = cbep_colors()[5],
             size = 1) +
   
+  xlab('') +
   ylab('Days with Coastal Flooding') +
   
   scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020)) +

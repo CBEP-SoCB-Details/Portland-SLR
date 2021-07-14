@@ -117,13 +117,14 @@ obs_annual <- obs_annual %>%
 ```
 
 # Number of Days with Recorded Flooding  
-```{r fig.height = 6, fig.width  = 6}
+```{r fig.height = 4, fig.width  = 6}
 plt2 <- ggplot(obs_annual, aes(Year, Floods)) +
   geom_point(color =cbep_colors()[4], size = 2) +
   geom_line(aes(y = predict * 365),
             color = cbep_colors()[5],
             size = 1) +
   
+  xlab('') +
   ylab('Days with Coastal Flooding') +
   
   scale_x_continuous(breaks = c(1920, 1940, 1960, 1980, 2000, 2020)) +
@@ -148,7 +149,7 @@ annot_data <- obs_annual %>%
 annot_data
 ```
 
-```{r annotate_graphic, fig.width = 6, fig.height = 6}
+```{r annotate_graphic, fig.width = 6, fig.height = 4}
 plt2 +
   geom_text(aes(x = Year, y = height, label = annot, hjust = c(0,1)),
             data = annot_data, size = 4.5)

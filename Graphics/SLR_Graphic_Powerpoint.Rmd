@@ -126,7 +126,7 @@ This a redrawing of the NOAA "Mean Sea Level Trend" graphic for Portland. I have
 added a 24 month (2 year) moving average.
 
 ## English Units Based on MLLW
-```{r plot_slr_mllw, fig.width = 6, fig.height = 6}
+```{r plot_slr_mllw, fig.width = 6, fig.height = 4}
 plt <- ggplot(slr_data, aes(theDate, MSL_ft)) + 
   geom_line(color=cbep_colors()[1]) +
   geom_line(aes(y=rollmean(MSL_ft,60, na.pad=TRUE)), color=cbep_colors()[2],
@@ -134,7 +134,7 @@ plt <- ggplot(slr_data, aes(theDate, MSL_ft)) +
   geom_smooth(method='lm', formula = y~x, se=FALSE, color=cbep_colors()[3],
               size = 1) + 
   theme_cbep() + 
-  xlab('Date') + 
+  xlab('') + 
   ylab('Monthly Mean Tide (ft, MSL)')
 
 # Add Annotation in inches Per Decade
