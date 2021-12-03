@@ -569,7 +569,7 @@ resample_once(epoch, Prediction, deviation, theDate, 0)
 
 ### Run Full Simulation
 
-the following takes about thirty seconds to run.
+The following takes about thirty seconds to run.
 
 ``` r
 set.seed(12345)
@@ -699,7 +699,7 @@ pacf(my_arima$residuals,  na.action = na.pass, lag.max = 24*5)
 ```
 
 <img src="Future_Tidal_Flooding_Events_files/figure-gfm/acf_arima_residuals-2.png" style="display: block; margin: auto;" />
-so we have gotten rid of most of the non-periodic structure, and the
+So we have gotten rid of most of the non-periodic structure, and the
 structure under a period of a few hours, but residuals still show
 higher-order periodic structure.
 
@@ -770,7 +770,7 @@ ggplot() +
 The range of simulations is perhaps a little narrower than the observed
 data, but since we simulated only 1/20 the data, that is not surprising.
 
-Lets look at the moments of the simulated data. (Results will vary; this
+Let's look at the moments of the simulated data. (Results will vary; this
 is a simulation).
 
 ``` r
@@ -976,7 +976,7 @@ v <- slr_annual$`One Foot`
 Under that simple model, one foot of SLR increases flooding by a
 whopping 21.8. Interestingly, that is mostly because the denominator –
 the number of floods predicted under no sea level rise – is so small. We
-use HAT as our definition of present-day flooding, but exceedences above
+use HAT as our definition of present-day flooding, but exceedances above
 HAT would have been few during the Tidal Epoch, because tidal
 predictions (including the definition of HAT) were based on observed
 tides during that period.
