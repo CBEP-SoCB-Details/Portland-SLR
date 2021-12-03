@@ -37,7 +37,7 @@ additional data analysis in response to comments by reviewers. That
 supplementary analysis included:  
 1.  a deeper dive into whether sea level rise in our region shows signs of
     accelerating, as has been widely predicted, and  
-2.  Development of development of a graphic examiniing whether frequency of
+2.  Development of a graphic examining whether frequency of
     extreme tidal flooding has increased.
 
 # Summary of Data Sources
@@ -67,7 +67,7 @@ daily tidal elevations exceeding a flood level equivalent to the current
 "Highest Astronomical Tide" level for Portland, at 11.95 ft MLLW.
 
 # Link to R Notebooks
-**THESE RELATIVE LINKS ARE NOT WORKING**
+**THESE RELATIVE LINKS ARE NOT WORKING** Did you get these working? 
 [SLR Graphics](../../Graphics/SLR_Graphic.md)
 
 [Analysis of recent SL trends](Analysis/SLR_Recent_Trends.md)
