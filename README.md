@@ -65,9 +65,3 @@ presumably reflects NOAA's pre-processing of the data.
 Additional hourly data was downloaded via the NOAA API to study probability of
 daily tidal elevations exceeding a flood level equivalent to the current
 "Highest Astronomical Tide" level for Portland, at 11.95 ft MLLW.
-
-# Link to R Notebooks
-**THESE RELATIVE LINKS ARE NOT WORKING** Did you get these working? 
-[SLR Graphics](../../Graphics/SLR_Graphic.md)
-
-[Analysis of recent SL trends](Analysis/SLR_Recent_Trends.md)
