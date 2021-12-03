@@ -31,8 +31,8 @@ Data downloaded directly from NOAA API using a simple python script
 Details on the API are available from the
 [NOAA web page](https://tidesandcurrents.noaa.gov/api/).
 
-This data was used to generate daily counts of exceedences above flood levels,
-where flood levels are defined as observations above Portland's highest Astronomica lTide (HAT), at 11.95 MLLW, or 
+This data was used to generate daily counts of exceedances above flood levels,
+where flood levels are defined as observations above Portland's Highest Astronomical Tide (HAT), at 11.95 MLLW, or 
 
 **portland_tides_hourly_predicts.csv**  
 Data downloaded directly from NOAA API using a simple python script
