@@ -205,7 +205,7 @@ twenty, or twenty five years is statistically different from the long
 term trend or not.
 
 We explore several concepts of what might constitute a significant
-difference is this setting. We focus on examining the most recent 20
+difference in this setting. We focus on examining the most recent 20
 years, then explore other time scales.
 
 1.  An ANCOVA-like model in which we can fit different slopes and
@@ -446,7 +446,7 @@ slopes_df %>%
 ```
 
 So, the slope for the most recent 20 20 year period is lower than 13 of
-the other 20 20 year periods in the historic record. Hardly a strong
+the other 20 year periods in the historic record. Hardly a strong
 case to be made that SLR is accelerating. We can view that graphically
 too.
 
@@ -486,7 +486,7 @@ caclulations with different spans.
 
 This function calculates a slope, and evaluates statistical significance
 of that slope, based on generalized least squares. This is a building
-block for later functions, and served here mostly t odemonstrate the
+block for later functions, and served here mostly to demonstrate the
 logic we use.
 
 We use non-standard evaluation (“quoting”) to access the names of the .x
