@@ -2,29 +2,29 @@ Analysis of Recent Sea Level Rise Trends at Portland, Maine
 ================
 Curtis C. Bohlen
 
-  - [Introduction](#introduction)
-  - [Import Libraries](#import-libraries)
-  - [Import Data](#import-data)
-  - [Estimating the Linear Trend](#estimating-the-linear-trend)
-  - [Mimic the NOAA Graphic](#mimic-the-noaa-graphic)
-      - [In Meters](#in-meters)
-  - [Reanalysis](#reanalysis)
-      - [Generate Cutpoints](#generate-cutpoints)
-      - [ANCOVA Model](#ancova-model)
-      - [Piecewise Linear Regression](#piecewise-linear-regression)
-      - [Visualizing the Models](#visualizing-the-models)
-      - [Cleanup](#cleanup)
-  - [All Periods of A Given Span](#all-periods-of-a-given-span)
-      - [Cleanup](#cleanup-1)
-  - [Multiple Periods for Arbitrary
+-   [Introduction](#introduction)
+-   [Import Libraries](#import-libraries)
+-   [Import Data](#import-data)
+-   [Estimating the Linear Trend](#estimating-the-linear-trend)
+-   [Mimic the NOAA Graphic](#mimic-the-noaa-graphic)
+    -   [In Meters](#in-meters)
+-   [Reanalysis](#reanalysis)
+    -   [Generate Cutpoints](#generate-cutpoints)
+    -   [ANCOVA Model](#ancova-model)
+    -   [Piecewise Linear Regression](#piecewise-linear-regression)
+    -   [Visualizing the Models](#visualizing-the-models)
+    -   [Cleanup](#cleanup)
+-   [All Periods of A Given Span](#all-periods-of-a-given-span)
+    -   [Cleanup](#cleanup-1)
+-   [Multiple Periods for Arbitrary
     Span](#multiple-periods-for-arbitrary-span)
-  - [Single Slope Function](#single-slope-function)
-      - [Test by Year](#test-by-year)
-      - [Test by Date](#test-by-date)
-  - [Multiple Slopes Function](#multiple-slopes-function)
-      - [Test Case](#test-case)
-      - [Many Slopes and Spans](#many-slopes-and-spans)
-  - [Graphic Summaries](#graphic-summaries)
+-   [Single Slope Function](#single-slope-function)
+    -   [Test by Year](#test-by-year)
+    -   [Test by Date](#test-by-date)
+-   [Multiple Slopes Function](#multiple-slopes-function)
+    -   [Test Case](#test-case)
+    -   [Many Slopes and Spans](#many-slopes-and-spans)
+-   [Graphic Summaries](#graphic-summaries)
 
 <img
     src="https://www.cascobayestuary.org/wp-content/uploads/2014/04/logo_sm.jpg"
@@ -43,17 +43,23 @@ that idea.
 
 ``` r
 library(tidyverse)
-#> -- Attaching packages --------------------------------------- tidyverse 1.3.0 --
-#> v ggplot2 3.3.2     v purrr   0.3.4
-#> v tibble  3.0.4     v dplyr   1.0.2
-#> v tidyr   1.1.2     v stringr 1.4.0
-#> v readr   1.4.0     v forcats 0.5.0
+#> Warning: package 'tidyverse' was built under R version 4.0.5
+#> -- Attaching packages --------------------------------------- tidyverse 1.3.1 --
+#> v ggplot2 3.3.5     v purrr   0.3.4
+#> v tibble  3.1.6     v dplyr   1.0.7
+#> v tidyr   1.1.4     v stringr 1.4.0
+#> v readr   2.1.0     v forcats 0.5.1
+#> Warning: package 'ggplot2' was built under R version 4.0.5
+#> Warning: package 'tidyr' was built under R version 4.0.5
+#> Warning: package 'dplyr' was built under R version 4.0.5
+#> Warning: package 'forcats' was built under R version 4.0.5
 #> -- Conflicts ------------------------------------------ tidyverse_conflicts() --
 #> x dplyr::filter() masks stats::filter()
 #> x dplyr::lag()    masks stats::lag()
 library(readr)
 
 library(zoo)     # for the rollmean function
+#> Warning: package 'zoo' was built under R version 4.0.5
 #> 
 #> Attaching package: 'zoo'
 #> The following objects are masked from 'package:base':
@@ -106,22 +112,14 @@ slr_data  <- read_csv(fpath,
   rename(MSL = Monthly_MSL) %>%
   mutate(theDate = as.Date(paste0(Year,'/', Month,'/',15))) %>%
   mutate(MSL_ft = MSL * 3.28084)
-#> Warning: 1299 parsing failures.
-#> row col  expected    actual                                                                                                                              file
-#>   1  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
-#>   2  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
-#>   3  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
-#>   4  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
-#>   5  -- 7 columns 8 columns 'C:/Users/curtis.bohlen/Documents/State of the Bay 2020/Data/A6. Climate Change/Portland-SLR/Original Data/8418150_meantrend.csv'
-#> ... ... ......... ......... .................................................................................................................................
-#> See problems(...) for more details.
+#> Warning: One or more parsing issues, see `problems()` for details
 ```
 
 # Estimating the Linear Trend
 
 We use a linear model analysis to compare results to the linear trend
 reported by NOAA on the source web page. NOAA reports the rate of sea
-level rise in millimeters as \(1.9 \pm 0.14 mm /yr\).
+level rise in millimeters as 1.9 ± 0.14*m**m*/*y**r*.
 
 The NOAA data are reported monthly, but to take advantage of the Date
 class in R, we expressed monthly data as relating to the fifteenth of
@@ -205,7 +203,7 @@ twenty, or twenty five years is statistically different from the long
 term trend or not.
 
 We explore several concepts of what might constitute a significant
-difference is this setting. We focus on examining the most recent 20
+difference in this setting. We focus on examining the most recent 20
 years, then explore other time scales.
 
 1.  An ANCOVA-like model in which we can fit different slopes and
@@ -445,8 +443,8 @@ slopes_df %>%
 #> 1        75     0.843         14      0.157
 ```
 
-So, the slope for the most recent 20 20 year period is lower than 13 of
-the other 20 20 year periods in the historic record. Hardly a strong
+So, the slope for the most recent twenty 20 year period is lower than 13
+of the other 20 year periods in the historic record. Hardly a strong
 case to be made that SLR is accelerating. We can view that graphically
 too.
 
@@ -486,7 +484,7 @@ caclulations with different spans.
 
 This function calculates a slope, and evaluates statistical significance
 of that slope, based on generalized least squares. This is a building
-block for later functions, and served here mostly t odemonstrate the
+block for later functions, and served here mostly to demonstrate the
 logic we use.
 
 We use non-standard evaluation (“quoting”) to access the names of the .x
@@ -801,7 +799,9 @@ plt
 <img src="SLR_Recent_Trends_files/figure-gfm/panel_histograms-1.png" style="display: block; margin: auto;" />
 
 There is certainly no strong evidence here that rate of SLR is
-increasing. This analyses shows that: 1. Whether recent periods show
-“high” rates of SLR depends critically on the period selected. 2. The
-most recent ten year period actually shows a fairly low slope based on
-historical values.
+increasing. This analyses shows that:
+
+1.  Whether recent periods show “high” rates of SLR depends critically
+    on the period selected.  
+2.  The most recent ten year period actually shows a fairly low slope
+    based on historical values.
